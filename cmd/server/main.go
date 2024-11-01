@@ -1,0 +1,21 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	router := gin.Default()
+
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "success",
+		})
+	})
+
+	router.Use(cors.Default())
+	router.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+}
