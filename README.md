@@ -1,5 +1,5 @@
 # EnvMonitorRealife
-結合 ESP32 的環境監控系統
+Environment monitor with ESP32
 
 # Group member
 - 4112064214 侯竣奇
