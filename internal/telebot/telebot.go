@@ -29,7 +29,7 @@ func New(token string, db *gorm.DB) *tele.Bot {
 		if result.Error != nil {
 			return c.Send("取得目前溫度失敗。")
 		} else {
-			return c.Send(fmt.Sprintf("目前的溫度是：%v °C", record.Temperature))
+			return c.Send(fmt.Sprintf("目前的溫度是：%v °C\nTimestamp：%v", record.Temperature, record.CreatedAt))
 		}
 	})
 	bot.Handle("/current_humidity", func(c tele.Context) error {
@@ -38,7 +38,7 @@ func New(token string, db *gorm.DB) *tele.Bot {
 		if result.Error != nil {
 			return c.Send("取得目前濕度失敗。")
 		} else {
-			return c.Send(fmt.Sprintf("目前的相對濕度是：%v%%", record.HumidityPercentage))
+			return c.Send(fmt.Sprintf("目前的相對濕度是：%v%%\nTimestamp：%v", record.HumidityPercentage, record.CreatedAt))
 		}
 	})
 
