@@ -25,20 +25,30 @@ func New(token string, db *gorm.DB) *tele.Bot {
 	})
 	bot.Handle("/current_temperature", func(c tele.Context) error {
 		record := &database.DetectEnvironment{}
-		result := db.Select("temperature").Last(record)
+		result := db.Select("temperature", "created_at").Last(record)
 		if result.Error != nil {
 			return c.Send("取得目前溫度失敗。")
 		} else {
-			return c.Send(fmt.Sprintf("目前的溫度是：%v °C\nTimestamp：%v", record.Temperature, record.CreatedAt))
+			return c.Send(
+				fmt.Sprintf("目前的溫度是：%v °C\nTimestamp：%v",
+					record.Temperature,
+					record.CreatedAt.In(time.FixedZone("Asia/Taipei", 8*60*60)).Format("2006-01-02 15:04:05"),
+				),
+			)
 		}
 	})
 	bot.Handle("/current_humidity", func(c tele.Context) error {
 		record := &database.DetectEnvironment{}
-		result := db.Select("humidity_percentage").Last(record)
+		result := db.Select("humidity_percentage", "created_at").Last(record)
 		if result.Error != nil {
 			return c.Send("取得目前濕度失敗。")
 		} else {
-			return c.Send(fmt.Sprintf("目前的相對濕度是：%v%%\nTimestamp：%v", record.HumidityPercentage, record.CreatedAt))
+			return c.Send(
+				fmt.Sprintf("目前的相對濕度是：%v%%\nTimestamp：%v",
+					record.HumidityPercentage,
+					record.CreatedAt.In(time.FixedZone("Asia/Taipei", 8*60*60)).Format("2006-01-02 15:04:05"),
+				),
+			)
 		}
 	})
 
