@@ -12,6 +12,7 @@ import (
 type detectEnvironment struct {
 	Temperature        float64 `json:"temperature" binding:"required"`
 	HumidityPercentage float64 `json:"humidity_percentage" binding:"required"`
+	FanStatus          string  `json:"fan_status" binding:"required"`
 }
 
 func New(db *gorm.DB) *gin.Engine {
@@ -63,9 +64,62 @@ func New(db *gorm.DB) *gin.Engine {
 			})
 		}
 
+		if err := database.InsertFanStatus(db, json.FanStatus); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": "風扇狀態儲存失敗",
+			})
+			return
+		}
+
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "資料新增成功",
 			"data":    json,
+		})
+	})
+
+	// 新增取得風扇狀態的端點
+	router.GET("/fan/status", func(ctx *gin.Context) {
+		status, err := database.GetLatestFanStatus(db)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": "無法取得風扇狀態",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"status": status.Status,
+		})
+	})
+
+	router.PUT("/fan/status", func(ctx *gin.Context) {
+		var req struct {
+			Status string `json:"status" binding:"required"`
+		}
+
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "JSON 格式錯誤",
+			})
+			return
+		}
+
+		if req.Status != "off" && req.Status != "clockwise" && req.Status != "counterclockwise" {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "無效的風扇狀態",
+			})
+			return
+		}
+
+		if err := database.InsertFanStatus(db, req.Status); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": "更新風扇狀態失敗",
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "風扇狀態更新成功",
+			"status":  req.Status,
 		})
 	})
 

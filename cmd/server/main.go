@@ -21,7 +21,7 @@ func main() {
 	router := api.New(db)
 
 	go func() {
-		router.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+		router.Run("0.0.0.0:8080") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	}()
 	bot.Start()
 }
