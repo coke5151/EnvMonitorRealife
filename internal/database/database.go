@@ -30,6 +30,12 @@ func GetLatestFanStatus(db *gorm.DB) (*FanStatus, error) {
 	var status FanStatus
 	result := db.Last(&status)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			// 如果找不到記錄，返回預設狀態
+			return &FanStatus{
+				Status: "off", // 預設為關閉
+			}, nil
+		}
 		return nil, result.Error
 	}
 	return &status, nil
