@@ -52,8 +52,8 @@ func New(token string, db *gorm.DB) *tele.Bot {
 		}
 	})
 
-	// 新增風扇狀態查詢命令
-	bot.Handle("/fanstatus", func(c tele.Context) error {
+	// 風扇狀態查詢命令
+	bot.Handle("/fan_status", func(c tele.Context) error {
 		status, err := database.GetLatestFanStatus(db)
 		if err != nil {
 			return c.Send("取得風扇狀態失敗。")
@@ -72,35 +72,26 @@ func New(token string, db *gorm.DB) *tele.Bot {
 		))
 	})
 
-	// 新增風扇狀態設定命令
-	bot.Handle("/setfan", func(c tele.Context) error {
-		args := c.Args()
-		if len(args) != 1 {
-			return c.Send("使用方式：/setfan [off|clockwise|counterclockwise]")
-		}
-
-		status := args[0]
-		validStatus := map[string]bool{
-			"off":              true,
-			"clockwise":        true,
-			"counterclockwise": true,
-		}
-
-		if !validStatus[status] {
-			return c.Send("無效的風扇狀態，請使用 off、clockwise 或 counterclockwise")
-		}
-
-		if err := database.InsertFanStatus(db, status); err != nil {
+	// 風扇控制命令
+	bot.Handle("/fan_off", func(c tele.Context) error {
+		if err := database.InsertFanStatus(db, "off"); err != nil {
 			return c.Send("設定風扇狀態失敗")
 		}
+		return c.Send("風扇狀態已設定為：關閉")
+	})
 
-		statusText := map[string]string{
-			"off":              "關閉",
-			"clockwise":        "正轉",
-			"counterclockwise": "逆轉",
-		}[status]
+	bot.Handle("/fan_on_1", func(c tele.Context) error {
+		if err := database.InsertFanStatus(db, "clockwise"); err != nil {
+			return c.Send("設定風扇狀態失敗")
+		}
+		return c.Send("風扇狀態已設定為：正轉")
+	})
 
-		return c.Send(fmt.Sprintf("風扇狀態已設定為：%s", statusText))
+	bot.Handle("/fan_on_2", func(c tele.Context) error {
+		if err := database.InsertFanStatus(db, "counterclockwise"); err != nil {
+			return c.Send("設定風扇狀態失敗")
+		}
+		return c.Send("風扇狀態已設定為：逆轉")
 	})
 
 	return bot
